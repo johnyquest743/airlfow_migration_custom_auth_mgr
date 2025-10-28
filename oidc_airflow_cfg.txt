@@ -1,0 +1,220 @@
+# Airflow 2.10 Configuration with OIDC Authentication
+# Complete configuration for OIDC/OAuth2 authentication
+
+[core]
+# Airflow home directory
+airflow_home = /path/to/airflow
+
+# DAGs and plugins folders
+dags_folder = /path/to/airflow/dags
+plugins_folder = /path/to/airflow/plugins
+
+# Executor
+executor = LocalExecutor
+
+# === OIDC AUTHENTICATION MANAGER ===
+# Point to your custom OIDC auth manager
+auth_manager = your_package.oidc_auth_manager.OIDCAuthManager
+
+# Load examples (disable in production)
+load_examples = False
+
+# Parallelism settings
+parallelism = 32
+max_active_tasks_per_dag = 16
+max_active_runs_per_dag = 16
+
+[database]
+# Database connection
+sql_alchemy_conn = postgresql+psycopg2://airflow:airflow@localhost:5432/airflow
+
+# Connection pool settings
+sql_alchemy_pool_enabled = True
+sql_alchemy_pool_size = 5
+sql_alchemy_pool_recycle = 1800
+sql_alchemy_max_overflow = 10
+
+[api]
+# API authentication - session based for OIDC
+auth_backends = airflow.api.auth.backend.session
+
+# Maximum page limit
+maximum_page_limit = 100
+
+[webserver]
+# Server settings
+web_server_host = 0.0.0.0
+web_server_port = 8080
+web_server_worker_timeout = 120
+workers = 4
+
+# === SESSION CONFIGURATION (CRITICAL) ===
+# Secret key for session encryption - MUST be strong and unique
+secret_key = change-this-to-a-very-secure-random-string-at-least-32-chars-long
+
+# Session backend
+session_backend = database
+
+# Session lifetime (30 days = 43200 minutes)
+session_lifetime_minutes = 43200
+
+# === COOKIE SETTINGS ===
+# Enable secure cookies if using HTTPS
+cookie_secure = True  # Set to True for HTTPS, False for HTTP
+
+# Cookie SameSite policy
+cookie_samesite = Lax
+
+# HTTP only cookies
+cookie_httponly = True
+
+# === SECURITY SETTINGS ===
+# Base URL (important for OAuth redirects)
+base_url = https://airflow.yourdomain.com
+
+# Expose configuration
+expose_config = False
+
+# X-Frame-Options
+x_frame_enabled = True
+
+# CSRF protection
+enable_csrf = True
+
+# === UI SETTINGS ===
+page_size = 100
+auto_refresh_interval = 3
+navbar_color = #fff
+
+# Default view
+default_ui_timezone = UTC
+
+[scheduler]
+# Scheduler settings
+scheduler_heartbeat_sec = 5
+min_file_process_interval = 30
+dag_dir_list_interval = 300
+parsing_processes = 2
+
+[logging]
+# Logging configuration
+base_log_folder = /path/to/airflow/logs
+remote_logging = False
+colored_console_log = True
+log_level = INFO
+
+# ==============================================================================
+# OIDC CONFIGURATION SECTION
+# ==============================================================================
+
+[oidc]
+# === OIDC Provider Configuration ===
+
+# Option 1: Use OpenID Connect Discovery (Recommended)
+# This automatically discovers all endpoints from the provider
+# Example for Okta:
+server_metadata_url = https://your-domain.okta.com/.well-known/openid-configuration
+
+# Option 2: Manual Configuration (use if discovery is not available)
+# Uncomment and configure these if NOT using server_metadata_url:
+# authorize_url = https://your-domain.okta.com/oauth2/v1/authorize
+# access_token_url = https://your-domain.okta.com/oauth2/v1/token
+# userinfo_url = https://your-domain.okta.com/oauth2/v1/userinfo
+# jwks_uri = https://your-domain.okta.com/oauth2/v1/keys
+
+# === Client Credentials ===
+# OAuth2 Client ID from your OIDC provider
+client_id = your-client-id-from-oidc-provider
+
+# OAuth2 Client Secret from your OIDC provider
+client_secret = your-client-secret-from-oidc-provider
+
+# === Scopes ===
+# Requested OAuth2 scopes (space-separated)
+scope = openid email profile groups
+
+# === Logout Configuration ===
+# OIDC provider logout endpoint (optional)
+# Example for Okta:
+end_session_endpoint = https://your-domain.okta.com/oauth2/v1/logout
+
+# === Role Mapping ===
+# Default role for new users
+default_role = Viewer
+
+# Map OIDC groups/roles to Airflow roles
+# Format: {'oidc_group': 'Airflow_Role', ...}
+# Example:
+role_mapping = {'airflow-admins': 'Admin', 'airflow-users': 'User', 'airflow-ops': 'Op', 'airflow-viewers': 'Viewer'}
+
+# ==============================================================================
+# PROVIDER-SPECIFIC EXAMPLES
+# ==============================================================================
+
+# --- OKTA Configuration Example ---
+# [oidc]
+# server_metadata_url = https://your-domain.okta.com/.well-known/openid-configuration
+# client_id = 0oa123abc456def789
+# client_secret = secret_key_from_okta
+# scope = openid email profile groups
+# end_session_endpoint = https://your-domain.okta.com/oauth2/v1/logout
+# default_role = Viewer
+# role_mapping = {'Everyone': 'Viewer', 'Airflow-Admins': 'Admin'}
+
+# --- Auth0 Configuration Example ---
+# [oidc]
+# server_metadata_url = https://your-domain.auth0.com/.well-known/openid-configuration
+# client_id = your_auth0_client_id
+# client_secret = your_auth0_client_secret
+# scope = openid email profile
+# end_session_endpoint = https://your-domain.auth0.com/v2/logout
+# default_role = Viewer
+
+# --- Keycloak Configuration Example ---
+# [oidc]
+# server_metadata_url = https://keycloak.yourdomain.com/realms/your-realm/.well-known/openid-configuration
+# client_id = airflow-client
+# client_secret = keycloak_client_secret
+# scope = openid email profile roles
+# end_session_endpoint = https://keycloak.yourdomain.com/realms/your-realm/protocol/openid-connect/logout
+# default_role = Viewer
+# role_mapping = {'airflow-admin': 'Admin', 'airflow-user': 'User'}
+
+# --- Azure AD Configuration Example ---
+# [oidc]
+# server_metadata_url = https://login.microsoftonline.com/your-tenant-id/v2.0/.well-known/openid-configuration
+# client_id = your_azure_app_id
+# client_secret = your_azure_client_secret
+# scope = openid email profile
+# default_role = Viewer
+# # Azure AD groups mapping
+# role_mapping = {'airflow-admins-group-id': 'Admin', 'airflow-users-group-id': 'User'}
+
+# --- Google Configuration Example ---
+# [oidc]
+# authorize_url = https://accounts.google.com/o/oauth2/v2/auth
+# access_token_url = https://oauth2.googleapis.com/token
+# userinfo_url = https://openidconnect.googleapis.com/v1/userinfo
+# client_id = your_google_client_id.apps.googleusercontent.com
+# client_secret = your_google_client_secret
+# scope = openid email profile
+# default_role = Viewer
+
+[metrics]
+# Metrics configuration
+statsd_on = False
+statsd_host = localhost
+statsd_port = 8125
+statsd_prefix = airflow
+
+[email]
+# Email configuration
+email_backend = airflow.providers.sendgrid.utils.emailer.send_email
+
+[smtp]
+# SMTP configuration
+smtp_host = localhost
+smtp_starttls = True
+smtp_ssl = False
+smtp_port = 25
+smtp_mail_from = airflow@example.com

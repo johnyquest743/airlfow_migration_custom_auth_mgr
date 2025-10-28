@@ -1,0 +1,243 @@
+# Airflow 2.10 Configuration with Custom Authentication
+# Complete configuration template
+
+[core]
+# Airflow home directory
+airflow_home = /path/to/airflow
+
+# DAGs folder
+dags_folder = /path/to/airflow/dags
+
+# Plugins folder
+plugins_folder = /path/to/airflow/plugins
+
+# Executor
+executor = LocalExecutor
+
+# Parallelism
+parallelism = 32
+max_active_tasks_per_dag = 16
+max_active_runs_per_dag = 16
+
+# === AUTHENTICATION MANAGER (NEW in 2.9+) ===
+# This is the key configuration for custom authentication
+auth_manager = your_package.custom_auth_manager.CustomAuthManager
+
+# Load examples (disable in production)
+load_examples = False
+
+# Default timezone
+default_timezone = utc
+
+# Task adoption
+task_adoption_timeout = 600
+task_queued_timeout = 600
+
+[database]
+# Database connection (moved from [core] in 2.10)
+sql_alchemy_conn = postgresql+psycopg2://airflow:airflow@localhost:5432/airflow
+
+# Connection pool settings
+sql_alchemy_pool_enabled = True
+sql_alchemy_pool_size = 5
+sql_alchemy_pool_recycle = 1800
+sql_alchemy_max_overflow = 10
+
+# Check migrations on startup
+check_migrations = True
+
+# Load default connections
+load_default_connections = True
+
+[api]
+# API authentication backends (legacy, but kept for compatibility)
+# auth_manager takes precedence in 2.10
+auth_backends = airflow.api.auth.backend.session
+
+# Enable/disable API
+enable_experimental_api = False  # Removed in 2.10
+
+# Maximum page size for API calls
+maximum_page_limit = 100
+
+[webserver]
+# Server settings
+web_server_host = 0.0.0.0
+web_server_port = 8080
+web_server_master_timeout = 120
+web_server_worker_timeout = 120
+workers = 4
+
+# === SESSION CONFIGURATION (CRITICAL for your issue) ===
+# Secret key for session encryption - MUST be set
+secret_key = change-this-to-a-very-secure-random-string-min-30-chars
+
+# Session backend (database or securecookie)
+session_backend = database
+
+# Session lifetime in minutes (43200 = 30 days)
+session_lifetime_minutes = 43200
+
+# Alternative: Use days
+# session_lifetime_days = 30
+
+# === COOKIE SETTINGS ===
+cookie_secure = False  # Set to True if using HTTPS
+cookie_samesite = Lax  # Lax, Strict, or None
+cookie_httponly = True
+
+# === SECURITY SETTINGS ===
+# Expose configuration in UI
+expose_config = False
+
+# X-Frame-Options
+x_frame_enabled = True
+
+# CSRF protection
+enable_csrf = True
+
+# Content Security Policy
+# content_security_policy = default-src 'self'
+
+# === UI SETTINGS ===
+# Base URL (if behind proxy)
+base_url = http://localhost:8080
+
+# Page size for list views
+page_size = 100
+
+# Auto refresh interval (seconds)
+auto_refresh_interval = 3
+
+# Navbar color
+navbar_color = #fff
+
+# === DEVELOPMENT SETTINGS ===
+# Debug mode (only for development)
+web_server_debug = False
+
+# Reload on plugin change
+reload_on_plugin_change = True
+
+# Log level
+log_level = INFO
+
+[scheduler]
+# Scheduler heartbeat
+scheduler_heartbeat_sec = 5
+
+# Health check threshold
+scheduler_health_check_threshold = 30
+
+# DAG parsing
+min_file_process_interval = 30
+dag_dir_list_interval = 300
+parsing_processes = 2
+
+# Maximum TIs per query
+max_tis_per_query = 512
+
+# Standalone DAG processor (run separately from scheduler)
+standalone_dag_processor = False
+
+# Use job schedule
+use_job_schedule = True
+
+# Allow trigger in future
+allow_trigger_in_future = False
+
+# Orphaned tasks
+orphaned_tasks_check_interval = 300
+cleanup_interval = 600
+
+[logging]
+# Base log folder
+base_log_folder = /path/to/airflow/logs
+
+# Remote logging
+remote_logging = False
+remote_log_conn_id = 
+remote_base_log_folder = 
+
+# Log formats
+log_format = [%%(asctime)s] {%%(filename)s:%%(lineno)d} %%(levelname)s - %%(message)s
+simple_log_format = %%(asctime)s %%(levelname)s - %%(message)s
+
+# Colored logs (for console)
+colored_console_log = True
+colored_log_format = [%%(blue)s%%(asctime)s%%(reset)s] {%%(blue)s%%(filename)s:%%(reset)s%%(lineno)d} %%(log_color)s%%(levelname)s%%(reset)s - %%(log_color)s%%(message)s%%(reset)s
+
+# Log filename template
+log_filename_template = dag_id={{ ti.dag_id }}/run_id={{ ti.run_id }}/task_id={{ ti.task_id }}/attempt={{ try_number }}.log
+
+# Log processor filename template
+log_processor_filename_template = {{ filename }}.log
+
+[metrics]
+# StatsD metrics
+statsd_on = False
+statsd_host = localhost
+statsd_port = 8125
+statsd_prefix = airflow
+
+# Metrics filtering
+metrics_block_list = 
+metrics_allow_list = 
+
+# OpenTelemetry (NEW in 2.10)
+otel_on = False
+otel_host = localhost
+otel_port = 4318
+otel_prefix = airflow
+otel_ssl_active = False
+
+[secrets]
+# Secrets backend (comma-separated for multiple backends)
+backend = 
+backend_kwargs = 
+
+# Example: Multiple backends
+# backends = airflow.providers.hashicorp.secrets.vault.VaultBackend
+
+[operators]
+# Default operator settings (NEW in 2.10)
+default_owner = airflow
+default_cpus = 1
+default_ram = 512
+default_disk = 512
+default_gpus = 0
+
+[email]
+# Email configuration
+email_backend = airflow.providers.sendgrid.utils.emailer.send_email
+email_conn_id = sendgrid_default
+
+[smtp]
+# SMTP settings (if using SMTP for emails)
+smtp_host = localhost
+smtp_starttls = True
+smtp_ssl = False
+smtp_user = 
+smtp_password = 
+smtp_port = 25
+smtp_mail_from = airflow@example.com
+
+[celery]
+# Celery configuration (if using CeleryExecutor)
+broker_url = redis://localhost:6379/0
+result_backend = db+postgresql://airflow:airflow@localhost:5432/airflow
+
+# Celery worker settings
+worker_concurrency = 16
+worker_prefetch_multiplier = 1
+worker_enable_remote_control = True
+
+[kubernetes]
+# Kubernetes configuration (if using KubernetesExecutor)
+namespace = airflow
+airflow_configmap = airflow-config
+worker_container_repository = apache/airflow
+worker_container_tag = 2.10.0
+
+# === CUSTOM SECTIONS FOR YOUR AUTH MANAGER ===
+# You can add custom sections for your auth manager configuration

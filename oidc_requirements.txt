@@ -1,0 +1,27 @@
+# Airflow OIDC Authentication Dependencies
+
+# Core Airflow (adjust version as needed)
+apache-airflow[postgres]==2.10.0
+
+# OAuth2 and OIDC support
+authlib>=1.2.0
+flask-session>=0.5.0
+cryptography>=41.0.0
+
+# For session storage in database
+SQLAlchemy>=1.4.0
+psycopg2-binary>=2.9.0  # For PostgreSQL
+
+# Optional: For Redis session backend (alternative to database)
+# redis>=4.5.0
+# flask-redis>=0.4.0
+
+# Optional: For enhanced security
+# python-jose[cryptography]>=3.3.0  # JWT handling
+# pyjwt>=2.8.0  # Alternative JWT library
+
+# Development dependencies (optional)
+# pytest>=7.0.0
+# pytest-cov>=4.0.0
+# black>=23.0.0
+# flake8>=6.0.0
