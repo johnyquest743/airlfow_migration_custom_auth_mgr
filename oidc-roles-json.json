@@ -1,0 +1,100 @@
+{
+  "_comment": "===============================================================================",
+  "_comment2": "File 2: oidc_roles.json",
+  "_comment3": "Location: $AIRFLOW_HOME/config/oidc_roles.json",
+  "_comment4": "Maps OIDC groups/roles to Airflow roles",
+  "_comment5": "===============================================================================",
+  
+  "role_mapping": {
+    "_comment_keycloak": "Keycloak group mappings",
+    "airflow_admin": ["Admin"],
+    "airflow_op": ["Op"],
+    "airflow_user": ["User"],
+    "airflow_viewer": ["Viewer"],
+    "airflow_public": ["Public"],
+    
+    "_comment_okta": "Okta group mappings",
+    "AirflowAdmins": ["Admin"],
+    "AirflowOperators": ["Op"],
+    "AirflowUsers": ["User"],
+    "AirflowViewers": ["Viewer"],
+    "AirflowPublic": ["Public"],
+    
+    "_comment_azure": "Azure AD group mappings",
+    "Airflow-Admins": ["Admin"],
+    "Airflow-Operators": ["Op"],
+    "Airflow-Users": ["User"],
+    "Airflow-Viewers": ["Viewer"],
+    "Airflow-Public": ["Public"],
+    
+    "_comment_google": "Google Workspace group mappings",
+    "airflow-admins@example.com": ["Admin"],
+    "airflow-operators@example.com": ["Op"],
+    "airflow-users@example.com": ["User"],
+    "airflow-viewers@example.com": ["Viewer"],
+    
+    "_comment_custom": "Custom group mappings",
+    "engineering": ["User"],
+    "data-engineering": ["Op"],
+    "data-science": ["User"],
+    "analytics": ["Viewer"],
+    "devops": ["Admin"],
+    "leadership": ["Viewer"]
+  },
+  
+  "airflow_roles": {
+    "_comment": "Available Airflow roles and their descriptions",
+    "Admin": {
+      "description": "Full administrative access to Airflow",
+      "permissions": ["all"]
+    },
+    "Op": {
+      "description": "Operational access - can trigger and manage DAGs",
+      "permissions": ["can_edit", "can_create", "can_delete", "can_read"]
+    },
+    "User": {
+      "description": "Standard user access - can view and trigger DAGs",
+      "permissions": ["can_read", "can_edit"]
+    },
+    "Viewer": {
+      "description": "Read-only access to view DAGs and logs",
+      "permissions": ["can_read"]
+    },
+    "Public": {
+      "description": "Minimal access for unauthenticated users",
+      "permissions": ["can_read_public"]
+    }
+  },
+  
+  "group_extraction": {
+    "_comment": "Configuration for extracting groups from different providers",
+    "keycloak": {
+      "claim_name": "groups",
+      "claim_type": "array",
+      "nested_path": null
+    },
+    "okta": {
+      "claim_name": "groups",
+      "claim_type": "array",
+      "nested_path": null
+    },
+    "azure": {
+      "claim_name": "groups",
+      "claim_type": "array",
+      "nested_path": null,
+      "use_graph_api": true,
+      "graph_api_endpoint": "https://graph.microsoft.com/v1.0/me/memberOf"
+    },
+    "google": {
+      "claim_name": "groups",
+      "claim_type": "array",
+      "nested_path": null
+    }
+  },
+  
+  "metadata": {
+    "version": "1.0",
+    "created": "2025-01-01",
+    "description": "Role mapping configuration for OIDC authentication"
+  }
+}

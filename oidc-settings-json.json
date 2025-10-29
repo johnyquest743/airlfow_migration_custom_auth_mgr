@@ -1,0 +1,116 @@
+{
+  "_comment": "===============================================================================",
+  "_comment2": "File 3: oidc_settings.json",
+  "_comment3": "Location: $AIRFLOW_HOME/config/oidc_settings.json",
+  "_comment4": "Additional OIDC and Airflow webserver settings",
+  "_comment5": "===============================================================================",
+  
+  "authentication": {
+    "auth_user_registration": true,
+    "auth_user_registration_role": "Viewer",
+    "auth_roles_sync_at_login": true,
+    "auth_user_registration_role_jmespath": null,
+    "oauth_allow_signup": true
+  },
+  
+  "session": {
+    "session_lifetime_hours": 12,
+    "session_cookie_secure": false,
+    "session_cookie_httponly": true,
+    "session_cookie_samesite": "Lax",
+    "remember_cookie_days": 7
+  },
+  
+  "application": {
+    "app_name": "Airflow",
+    "app_theme": "",
+    "app_icon": "/static/pin_100.png",
+    "show_footer": true,
+    "footer_text": "Powered by Apache Airflow"
+  },
+  
+  "rate_limiting": {
+    "ratelimit_enabled": true,
+    "ratelimit_storage_uri": "memory://",
+    "ratelimit_strategy": "moving-window",
+    "ratelimit_default": "200 per day, 50 per hour",
+    "ratelimit_headers_enabled": true
+  },
+  
+  "security": {
+    "csrf_enabled": true,
+    "csrf_time_limit": null,
+    "force_https": false,
+    "strict_transport_security": false,
+    "strict_transport_security_max_age": 31536000,
+    "content_security_policy": null
+  },
+  
+  "logging": {
+    "fab_logging_level": "INFO",
+    "log_userinfo_requests": true,
+    "log_token_requests": false,
+    "log_authorization_requests": true
+  },
+  
+  "network": {
+    "request_timeout": 30,
+    "connect_timeout": 10,
+    "verify_ssl": true,
+    "ssl_cert_path": null,
+    "ssl_key_path": null,
+    "proxy_url": null,
+    "proxy_headers": null
+  },
+  
+  "token_management": {
+    "token_refresh_enabled": true,
+    "token_refresh_window_seconds": 300,
+    "token_expiry_check_enabled": true,
+    "store_tokens_in_session": true
+  },
+  
+  "user_management": {
+    "auto_deactivate_users": false,
+    "user_sync_frequency_minutes": 60,
+    "delete_orphaned_users": false,
+    "case_sensitive_username": false,
+    "normalize_email": true,
+    "allowed_email_domains": [],
+    "blocked_email_domains": []
+  },
+  
+  "advanced": {
+    "jwt_validation_enabled": true,
+    "jwt_algorithm": "RS256",
+    "jwt_audience": null,
+    "jwt_issuer_validation": true,
+    "pkce_enabled": true,
+    "state_validation_enabled": true,
+    "nonce_enabled": true
+  },
+  
+  "features": {
+    "enable_group_sync": true,
+    "enable_profile_picture": false,
+    "enable_custom_claims": true,
+    "custom_claims": [
+      "department",
+      "employee_id",
+      "location"
+    ]
+  },
+  
+  "fallback": {
+    "enable_local_auth": false,
+    "local_auth_url": "/login",
+    "allow_password_reset": false
+  },
+  
+  "metadata": {
+    "version": "1.0",
+    "created": "2025-01-01",
+    "last_updated": "2025-01-01",
+    "description": "OIDC settings and configuration for Airflow 2.10"
+  }
+}

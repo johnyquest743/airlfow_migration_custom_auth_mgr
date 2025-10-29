@@ -1,0 +1,193 @@
+{
+  "_comment": "===============================================================================",
+  "_comment2": "File: oidc_roles.json - IDA Role Mapping",
+  "_comment3": "Location: $AIRFLOW_HOME/config/oidc_roles.json",
+  "_comment4": "Maps IDA groups/roles to Airflow roles",
+  "_comment5": "Update this based on your firm's IDA group structure",
+  "_comment6": "===============================================================================",
+  
+  "role_mapping": {
+    "_comment_admin": "IDA Admin Groups - Full Airflow access",
+    "IDA-AIRFLOW-ADMIN": ["Admin"],
+    "IDA-DATA-PLATFORM-ADMIN": ["Admin"],
+    "IDA-DEVOPS-ADMIN": ["Admin"],
+    "AIRFLOW_ADMINISTRATORS": ["Admin"],
+    
+    "_comment_ops": "IDA Operations Groups - Can create, edit, delete DAGs",
+    "IDA-AIRFLOW-OPS": ["Op"],
+    "IDA-DATA-ENGINEERING": ["Op"],
+    "IDA-PLATFORM-OPERATORS": ["Op"],
+    "AIRFLOW_OPERATORS": ["Op"],
+    
+    "_comment_user": "IDA User Groups - Can view and trigger DAGs",
+    "IDA-AIRFLOW-USER": ["User"],
+    "IDA-DATA-ANALYSTS": ["User"],
+    "IDA-DATA-SCIENTISTS": ["User"],
+    "AIRFLOW_USERS": ["User"],
+    
+    "_comment_viewer": "IDA Viewer Groups - Read-only access",
+    "IDA-AIRFLOW-VIEWER": ["Viewer"],
+    "IDA-DATA-VIEWER": ["Viewer"],
+    "IDA-REPORTING": ["Viewer"],
+    "AIRFLOW_VIEWERS": ["Viewer"],
+    
+    "_comment_dept": "Department-based role mapping",
+    "IDA-DEPT-FINANCE": ["User"],
+    "IDA-DEPT-MARKETING": ["Viewer"],
+    "IDA-DEPT-SALES": ["Viewer"],
+    "IDA-DEPT-IT": ["Op"],
+    "IDA-DEPT-ANALYTICS": ["User"],
+    
+    "_comment_project": "Project-based role mapping",
+    "IDA-PROJECT-DATA-LAKE": ["Op"],
+    "IDA-PROJECT-ML-PLATFORM": ["User"],
+    "IDA-PROJECT-ETL": ["Op"],
+    
+    "_comment_functional": "Functional role mapping",
+    "IDA-ROLE-DEVELOPER": ["Op"],
+    "IDA-ROLE-ANALYST": ["User"],
+    "IDA-ROLE-MANAGER": ["Viewer"],
+    "IDA-ROLE-AUDITOR": ["Viewer"]
+  },
+  
+  "airflow_roles": {
+    "Admin": {
+      "description": "Full administrative access to Airflow",
+      "permissions": [
+        "can_create",
+        "can_read",
+        "can_edit",
+        "can_delete",
+        "can_dag_edit",
+        "can_dag_read",
+        "can_task_instance",
+        "can_conf",
+        "menu_access",
+        "all_dags"
+      ],
+      "typical_ida_groups": [
+        "IDA-AIRFLOW-ADMIN",
+        "IDA-DATA-PLATFORM-ADMIN"
+      ]
+    },
+    "Op": {
+      "description": "Operational access - can trigger and manage DAGs",
+      "permissions": [
+        "can_create",
+        "can_read",
+        "can_edit",
+        "can_delete",
+        "can_dag_edit",
+        "can_dag_read",
+        "can_task_instance"
+      ],
+      "typical_ida_groups": [
+        "IDA-AIRFLOW-OPS",
+        "IDA-DATA-ENGINEERING"
+      ]
+    },
+    "User": {
+      "description": "Standard user access - can view and trigger DAGs",
+      "permissions": [
+        "can_read",
+        "can_edit",
+        "can_dag_read",
+        "can_task_instance"
+      ],
+      "typical_ida_groups": [
+        "IDA-AIRFLOW-USER",
+        "IDA-DATA-ANALYSTS"
+      ]
+    },
+    "Viewer": {
+      "description": "Read-only access to view DAGs and logs",
+      "permissions": [
+        "can_read",
+        "can_dag_read"
+      ],
+      "typical_ida_groups": [
+        "IDA-AIRFLOW-VIEWER",
+        "IDA-DATA-VIEWER"
+      ]
+    },
+    "Public": {
+      "description": "Minimal access for public/guest users",
+      "permissions": [
+        "can_read_public"
+      ],
+      "typical_ida_groups": []
+    }
+  },
+  
+  "group_extraction": {
+    "ida": {
+      "claim_name": "groups",
+      "claim_type": "array",
+      "nested_path": null,
+      "use_roles_claim": true,
+      "roles_claim_name": "roles",
+      "combine_groups_and_roles": true,
+      "case_sensitive": false,
+      "normalize_names": true,
+      "prefix_filter": "IDA-",
+      "exclude_patterns": [
+        "IDA-TEMP-*",
+        "IDA-ARCHIVED-*"
+      ]
+    }
+  },
+  
+  "fallback_roles": {
+    "default_role": "Viewer",
+    "use_default_if_no_match": true,
+    "allow_no_role_access": false,
+    "reject_users_without_groups": false
+  },
+  
+  "role_hierarchy": {
+    "_comment": "Role inheritance - higher roles inherit lower role permissions",
+    "Admin": ["Op", "User", "Viewer"],
+    "Op": ["User", "Viewer"],
+    "User": ["Viewer"]
+  },
+  
+  "custom_role_rules": {
+    "_comment": "Custom rules for special cases",
+    "rules": [
+      {
+        "name": "senior_analysts",
+        "condition": {
+          "any_group": ["IDA-SENIOR-ANALYST", "IDA-LEAD-ANALYST"]
+        },
+        "assign_roles": ["Op"]
+      },
+      {
+        "name": "contractors",
+        "condition": {
+          "any_group": ["IDA-CONTRACTOR"]
+        },
+        "assign_roles": ["Viewer"],
+        "max_session_hours": 8
+      },
+      {
+        "name": "emergency_access",
+        "condition": {
+          "any_group": ["IDA-EMERGENCY-ACCESS"]
+        },
+        "assign_roles": ["Admin"],
+        "require_approval": true,
+        "temporary": true,
+        "duration_hours": 4
+      }
+    ]
+  },
+  
+  "metadata": {
+    "version": "1.0",
+    "created": "2025-01-01",
+    "last_updated": "2025-01-01",
+    "description": "IDA role mapping configuration for Airflow",
+    "maintainer": "data-platform-team@yourfirm.com",
+    "ida_integration_version": "2.0"
+  }
+}
