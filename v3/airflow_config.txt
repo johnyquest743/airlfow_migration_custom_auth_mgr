@@ -1,0 +1,136 @@
+# ============================================================================
+# Airflow 2.10 OIDC Configuration
+# ============================================================================
+
+[core]
+# ... other core settings ...
+
+[webserver]
+# Authentication type
+authenticate = True
+auth_backend = airflow.api.auth.backend.basic_auth
+
+# Session settings
+session_lifetime_minutes = 43200
+cookie_secure = False
+cookie_samesite = Lax
+
+# Base URL (IMPORTANT: Set this to your actual Airflow URL)
+base_url = http://localhost:8080
+
+# Enable RBAC
+rbac = True
+
+# ============================================================================
+# FAB (Flask-AppBuilder) Configuration
+# ============================================================================
+[fab]
+# CRITICAL: Set auth type to AUTH_OAUTH
+auth_type = AUTH_OAUTH
+
+# Use custom security manager
+auth_manager = your_module_path.oidc_auth_manager.OIDCAuthManager
+
+# Auto-redirect to OAuth provider (bypasses "Sign in with OIDC" button)
+# Set to True to automatically redirect to OIDC login
+auth_rate_limited = False
+auth_rate_limit = 5 per 40 second
+
+# OAuth auto-redirect settings
+# This will automatically redirect users to OIDC provider
+oauth_providers = oidc
+
+# ============================================================================
+# OIDC Provider Configuration
+# ============================================================================
+[oidc]
+# OIDC Client Configuration
+client_id = your-client-id
+client_secret = your-client-secret
+
+# Option 1: Use OIDC Discovery (Recommended)
+# This automatically discovers all endpoints
+server_metadata_url = https://your-oidc-provider.com/.well-known/openid-configuration
+
+# Option 2: Manual Endpoint Configuration (if discovery not available)
+# Uncomment and configure these if not using server_metadata_url
+# authorize_url = https://your-oidc-provider.com/oauth2/authorize
+# access_token_url = https://your-oidc-provider.com/oauth2/token
+# userinfo_url = https://your-oidc-provider.com/oauth2/userinfo
+# jwks_uri = https://your-oidc-provider.com/oauth2/keys
+
+# API base URL (optional, for some providers)
+api_base_url = https://your-oidc-provider.com
+
+# CRITICAL: Custom Redirect URI
+# This is the URL that OIDC provider will redirect back to after authentication
+# Make sure this matches what's configured in your OIDC provider application settings
+
+# Option 1: Use default FAB OAuth callback (leave commented out or don't set)
+# Default: http://localhost:8080/oauth-authorized/oidc
+
+# Option 2: Use custom redirect URI (uncomment and set your custom path)
+custom_redirect_uri = http://localhost:8080/oidc/callback
+
+# You can use any custom path you want:
+# custom_redirect_uri = http://localhost:8080/auth/oidc/callback
+# custom_redirect_uri = http://localhost:8080/custom/oauth/return
+# custom_redirect_uri = http://localhost:8080/sso/callback
+
+# Scopes to request
+scope = openid email profile groups
+
+# Logout endpoint (optional)
+end_session_endpoint = https://your-oidc-provider.com/oauth2/logout
+
+# Role Mapping (JSON format)
+# Maps OIDC groups/roles to Airflow roles
+# Example: {"oidc-admin-group": "Admin", "oidc-user-group": "User", "oidc-viewer-group": "Viewer"}
+role_mapping = {"airflow-admins": "Admin", "airflow-ops": "Op", "airflow-users": "User"}
+
+# Default role for new users
+default_role = Viewer
+
+# ============================================================================
+# Example Configurations for Popular OIDC Providers
+# ============================================================================
+
+# --- OKTA ---
+# server_metadata_url = https://your-domain.okta.com/.well-known/openid-configuration
+# client_id = your-okta-client-id
+# client_secret = your-okta-client-secret
+# scope = openid email profile groups
+# redirect_uri = http://localhost:8080/oauth-authorized/oidc
+# api_base_url = https://your-domain.okta.com
+
+# --- Auth0 ---
+# server_metadata_url = https://your-tenant.auth0.com/.well-known/openid-configuration
+# client_id = your-auth0-client-id
+# client_secret = your-auth0-client-secret
+# scope = openid email profile
+# redirect_uri = http://localhost:8080/oauth-authorized/oidc
+# api_base_url = https://your-tenant.auth0.com
+
+# --- Keycloak ---
+# server_metadata_url = https://your-keycloak.com/realms/your-realm/.well-known/openid-configuration
+# client_id = airflow-client
+# client_secret = your-keycloak-secret
+# scope = openid email profile groups
+# redirect_uri = http://localhost:8080/oauth-authorized/oidc
+
+# --- Azure AD ---
+# server_metadata_url = https://login.microsoftonline.com/your-tenant-id/v2.0/.well-known/openid-configuration
+# client_id = your-azure-client-id
+# client_secret = your-azure-client-secret
+# scope = openid email profile
+# redirect_uri = http://localhost:8080/oauth-authorized/oidc
+
+# --- Google ---
+# authorize_url = https://accounts.google.com/o/oauth2/auth
+# access_token_url = https://accounts.google.com/o/oauth2/token
+# userinfo_url = https://www.googleapis.com/oauth2/v1/userinfo
+# client_id = your-google-client-id.apps.googleusercontent.com
+# client_secret = your-google-client-secret
+# scope = openid email profile
+# redirect_uri = http://localhost:8080/oauth-authorized/oidc
+# api_base_url = https://www.googleapis.com
